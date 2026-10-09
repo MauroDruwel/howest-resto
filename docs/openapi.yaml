@@ -1,0 +1,171 @@
+openapi: 3.0.3
+info:
+  title: Howest Resto API
+  version: 1.0.0
+  description: Modern, structured JSON API and OpenAPI specification for Howest student restaurant weekly menus, scraped directly from resto.howest.be.
+  contact:
+    name: Mauro Druwel
+    url: https://github.com/MauroDruwel
+servers:
+  - url: https://resto-api.maurodruwel.workers.dev
+    description: Cloudflare Worker Production
+  - url: http://localhost:8787
+    description: Local Dev Server
+
+paths:
+  /api/campuses:
+    get:
+      summary: List all Howest restaurant campuses
+      description: Returns all known campuses with code, display name, address, and city.
+      operationId: listCampuses
+      responses:
+        '200':
+          description: List of campuses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Campus'
+
+  /api/menu:
+    get:
+      summary: Get weekly menu
+      description: Returns the full weekly menu for the specified campus (default GKG - 't Obeetje).
+      operationId: getWeeklyMenu
+      parameters:
+        - name: campus
+          in: query
+          required: false
+          description: Campus identifier code (e.g., GKG, RSS, RSS1, PENTA, SIC, TS)
+          schema:
+            type: string
+            default: GKG
+      responses:
+        '200':
+          description: Weekly menu successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyMenuResponse'
+        '400':
+          description: Invalid campus code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/menu/today:
+    get:
+      summary: Get today's menu
+      description: Returns the dish items for today for the specified campus.
+      operationId: getTodayMenu
+      parameters:
+        - name: campus
+          in: query
+          required: false
+          description: Campus identifier code (default GKG)
+          schema:
+            type: string
+            default: GKG
+      responses:
+        '200':
+          description: Today's menu items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyMenu'
+        '404':
+          description: No menu available for today (e.g. weekend or closed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Campus:
+      type: object
+      required:
+        - code
+        - name
+        - address
+        - city
+      properties:
+        code:
+          type: string
+          example: GKG
+        name:
+          type: string
+          example: "'t Obeetje"
+        address:
+          type: string
+          example: Graaf Karel de Goedelaan 5
+        city:
+          type: string
+          example: Kortrijk
+
+    DailyMenu:
+      type: object
+      required:
+        - day
+        - date
+        - dutchDishes
+        - englishDishes
+      properties:
+        day:
+          type: string
+          description: Day of week abbreviation (e.g. Ma, Di, Wo, Do, Vr)
+          example: Vr
+        date:
+          type: string
+          description: Date string from site (e.g. 09 oktober)
+          example: "09 oktober"
+        dutchDishes:
+          type: array
+          items:
+            type: string
+          example:
+            - "Ravioli 4-kazen met spinazie & Ricotta"
+        englishDishes:
+          type: array
+          items:
+            type: string
+          example:
+            - "Ravioli 4-Cheeses with Spinach & Ricotta"
+        allRawItems:
+          type: array
+          items:
+            type: string
+
+    WeeklyMenuResponse:
+      type: object
+      required:
+        - campus
+        - campusName
+        - days
+        - fetchedAt
+      properties:
+        campus:
+          type: string
+          example: GKG
+        campusName:
+          type: string
+          example: "'t Obeetje (Graaf Karel de Goedelaan 5, Kortrijk)"
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyMenu'
+        fetchedAt:
+          type: string
+          format: date-time
+          example: "2026-10-09T11:15:00Z"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "Menu not found for today"
