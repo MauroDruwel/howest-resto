@@ -31,12 +31,49 @@ Structured JSON API, OpenAPI 3.0.3 specification, and Cloudflare Forge configura
 
 ---
 
-## 🚀 API Endpoints
+## 📦 Multi-Language Client SDKs
+
+The repository provides native client libraries that read directly from Howest's system (no API server hosting required):
+
+### Python (`packages/sdk-py`)
+Zero external dependencies (uses standard library `urllib` & `html.parser`):
+```python
+from howest_resto import HowestRestoClient
+
+client = HowestRestoClient()
+
+# Get next week's menu for Kortrijk
+menu = client.get_menu(campus="GKG", week="next")
+for day in menu.days:
+    print(day.day, day.date, day.dutch_dishes)
+
+# Get today's menu for Brugge
+today = client.get_today_menu(campus="RSS")
+if today:
+    print("Today in Brugge:", today.dutch_dishes)
+```
+
+### TypeScript / Node (`packages/sdk-ts`)
+```typescript
+import { HowestRestoClient } from '@maurodruwel/howest-resto';
+
+const client = new HowestRestoClient();
+
+// Get next week's menu
+const menu = await client.getMenu({ campus: 'GKG', week: 'next' });
+console.log(menu.campusName, menu.days);
+```
+
+---
+
+## 🚀 Cloudflare Worker & API Endpoints
+
+For REST / OpenAPI integration:
 
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/campuses` | Returns list of all known Howest campuses with locations |
-| `GET` | `/api/menu?campus=GKG` | Returns the full weekly menu for the given campus |
+| `GET` | `/api/menu?campus=GKG&week=next` | Returns weekly menu (`week`: `current`, `next`, `previous`) |
 | `GET` | `/api/menu/today?campus=GKG` | Returns today's specific dishes (Dutch + English) |
 | `GET` | `/` | API status and available endpoints summary |
 
