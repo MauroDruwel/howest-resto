@@ -95,9 +95,12 @@ export function parseMenuHtml(html: string): { campusTitle: string; days: DailyM
 }
 
 /**
- * Fetches weekly menu for a given campus from resto.howest.be
+ * Fetches weekly menu for a given campus and week offset from resto.howest.be
  */
-export async function fetchWeeklyMenu(campusCode = 'GKG'): Promise<WeeklyMenuResponse> {
+export async function fetchWeeklyMenu(
+  campusCode = 'GKG',
+  week: 'current' | 'next' | 'previous' = 'current'
+): Promise<WeeklyMenuResponse> {
   const normalizedCode = campusCode.toUpperCase();
   const campus = CAMPUSES.find((c) => c.code === normalizedCode);
   if (!campus) {
@@ -116,21 +119,27 @@ export async function fetchWeeklyMenu(campusCode = 'GKG'): Promise<WeeklyMenuRes
 
   let html = await initialRes.text();
 
-  // If campus is not default (GKG), post the ASP.NET form to switch campus
-  if (normalizedCode !== 'GKG') {
+  // If campus is not default (GKG) OR if week is not current, post the form
+  if (normalizedCode !== 'GKG' || week !== 'current') {
     const $ = cheerio.load(html);
-    const viewState = $('input#__VIEWSTATE').val() as string || '';
-    const viewStateGen = $('input#__VIEWSTATEGENERATOR').val() as string || '';
-    const eventValidation = $('input#__EVENTVALIDATION').val() as string || '';
+    const viewState = ($('input#__VIEWSTATE').val() as string) || '';
+    const viewStateGen = ($('input#__VIEWSTATEGENERATOR').val() as string) || '';
+    const eventValidation = ($('input#__EVENTVALIDATION').val() as string) || '';
 
     const bodyParams = new URLSearchParams({
-      __EVENTTARGET: 'ddlChooseCampus',
+      __EVENTTARGET: week === 'current' ? 'ddlChooseCampus' : '',
       __EVENTARGUMENT: '',
       __VIEWSTATE: viewState,
       __VIEWSTATEGENERATOR: viewStateGen,
       __EVENTVALIDATION: eventValidation,
       ddlChooseCampus: normalizedCode,
     });
+
+    if (week === 'next') {
+      bodyParams.set('btnNextWeeklyMenu', 'Volgende week');
+    } else if (week === 'previous') {
+      bodyParams.set('btnPreviousWeeklyMenu', 'Vorige week');
+    }
 
     const postRes = await fetch(BASE_URL, {
       method: 'POST',
@@ -142,7 +151,7 @@ export async function fetchWeeklyMenu(campusCode = 'GKG'): Promise<WeeklyMenuRes
     });
 
     if (!postRes.ok) {
-      throw new Error(`Failed to switch campus to ${normalizedCode}: HTTP ${postRes.status}`);
+      throw new Error(`Failed to fetch menu for ${normalizedCode} (${week}): HTTP ${postRes.status}`);
     }
 
     html = await postRes.text();
@@ -153,6 +162,7 @@ export async function fetchWeeklyMenu(campusCode = 'GKG'): Promise<WeeklyMenuRes
   return {
     campus: normalizedCode,
     campusName: parsed.campusTitle || campus.fullName,
+    week,
     days: parsed.days,
     fetchedAt: new Date().toISOString(),
   };

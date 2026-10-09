@@ -31,7 +31,7 @@ paths:
   /api/menu:
     get:
       summary: Get weekly menu
-      description: Returns the full weekly menu for the specified campus (default GKG - 't Obeetje).
+      description: Returns the full weekly menu for the specified campus and week offset.
       operationId: getWeeklyMenu
       parameters:
         - name: campus
@@ -41,6 +41,14 @@ paths:
           schema:
             type: string
             default: GKG
+        - name: week
+          in: query
+          required: false
+          description: Week offset to fetch (current, next, previous)
+          schema:
+            type: string
+            enum: [current, next, previous]
+            default: current
       responses:
         '200':
           description: Weekly menu successfully retrieved
@@ -68,6 +76,14 @@ paths:
           schema:
             type: string
             default: GKG
+        - name: week
+          in: query
+          required: false
+          description: Week offset (current, next, previous)
+          schema:
+            type: string
+            enum: [current, next, previous]
+            default: current
       responses:
         '200':
           description: Today's menu items
@@ -143,6 +159,7 @@ components:
       required:
         - campus
         - campusName
+        - week
         - days
         - fetchedAt
       properties:
@@ -152,6 +169,10 @@ components:
         campusName:
           type: string
           example: "'t Obeetje (Graaf Karel de Goedelaan 5, Kortrijk)"
+        week:
+          type: string
+          enum: [current, next, previous]
+          example: current
         days:
           type: array
           items:

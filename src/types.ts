@@ -17,6 +17,7 @@ export interface DailyMenu {
 export interface WeeklyMenuResponse {
   campus: string;
   campusName: string;
+  week: 'current' | 'next' | 'previous';
   days: DailyMenu[];
   fetchedAt: string;
 }

@@ -27,7 +27,12 @@ export default {
 
       if (pathname === '/api/menu') {
         const campus = searchParams.get('campus') || 'GKG';
-        const data = await fetchWeeklyMenu(campus);
+        const rawWeek = searchParams.get('week') || 'current';
+        const week = ['current', 'next', 'previous'].includes(rawWeek)
+          ? (rawWeek as 'current' | 'next' | 'previous')
+          : 'current';
+
+        const data = await fetchWeeklyMenu(campus, week);
         return new Response(JSON.stringify(data, null, 2), {
           status: 200,
           headers: corsHeaders,
@@ -36,7 +41,12 @@ export default {
 
       if (pathname === '/api/menu/today') {
         const campus = searchParams.get('campus') || 'GKG';
-        const data = await fetchWeeklyMenu(campus);
+        const rawWeek = searchParams.get('week') || 'current';
+        const week = ['current', 'next', 'previous'].includes(rawWeek)
+          ? (rawWeek as 'current' | 'next' | 'previous')
+          : 'current';
+
+        const data = await fetchWeeklyMenu(campus, week);
 
         // Map today's day of week to Dutch 2-letter abbreviation
         const dayMap: Record<number, string> = {

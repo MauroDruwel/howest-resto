@@ -69,4 +69,30 @@ describe('Howest Resto Scraper', () => {
     expect(result.days[0].dutchDishes).toEqual(['Dagschotel']);
     expect(result.days[0].englishDishes).toEqual([]);
   });
+
+  it('correctly parses next week menus', () => {
+    const nextWeekHtml = `
+      <h3 id="titleWeekmenu">Weekmenu 't Obeetje (Graaf Karel de Goedelaan 5, Kortrijk)</h3>
+      <div class="divWeekdag">
+        <span class="spanDate">Ma</span>
+        <span class="spanDag">12 oktober</span>
+        <ul>
+          <li>Kalkoennootje met Dragonroomsaus</li>
+          <li>Snijbonen</li>
+          <li>Gekookte Aardappelen</li>
+          <li>***</li>
+          <li>Turkey Breast with Tarragon Sauce</li>
+          <li>String Beans</li>
+          <li>Boiled Potatoes</li>
+        </ul>
+      </div>
+    `;
+
+    const result = parseMenuHtml(nextWeekHtml);
+    expect(result.days).toHaveLength(1);
+    expect(result.days[0].day).toBe('Ma');
+    expect(result.days[0].date).toBe('12 oktober');
+    expect(result.days[0].dutchDishes).toContain('Kalkoennootje met Dragonroomsaus');
+    expect(result.days[0].englishDishes).toContain('Turkey Breast with Tarragon Sauce');
+  });
 });
