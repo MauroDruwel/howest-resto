@@ -28,7 +28,7 @@ CAMPUSES: list[Campus] = [
 ]
 
 BASE_URL = "https://resto.howest.be/MenuWeekly.aspx"
-DEFAULT_USER_AGENT = "HowestRestoClient/1.0 (+https://github.com/MauroDruwel/howest-resto-py)"
+DEFAULT_USER_AGENT = "HowestRestoClient/1.0 (+https://github.com/MauroDruwel/howest-resto)"
 
 
 class _RestoHtmlParser(HTMLParser):
