@@ -1,4 +1,4 @@
-"""Official Python client for Howest University student restaurant menus."""
+"""Unofficial Python client for Howest University student restaurant menus."""
 
 from __future__ import annotations
 

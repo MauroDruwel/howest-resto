@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Quality Gate](https://img.shields.io/badge/Mauro%20Quality%20Gate-Passed-brightgreen)](https://github.com/MauroDruwel/quality-gate)
 
-Official, typed Python client library for **Howest University of Applied Sciences** student restaurant menus.
+Unofficial, typed Python client library for **Howest University of Applied Sciences** student restaurant menus.
 
 Designed with **zero external dependencies** and built-in async support for modern Python applications and **Home Assistant** integrations.
 
