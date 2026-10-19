@@ -1,28 +1,30 @@
 /**
- * Cloudflare Forge Configuration
- * Generates client SDKs and OpenAPI endpoints for Howest Resto API
+ * Cloudflare Forge Configuration for Howest Resto
+ * Generates client SDKs and OpenAPI documentation directly from docs/openapi.yaml.
  */
 
 export default {
-  // Source OpenAPI specification
+  // Source OpenAPI 3.0.3 specification
   spec: "./docs/openapi.yaml",
 
-  // Output targets
+  // Generation output targets
   targets: [
     {
       type: "sdk",
-      language: "typescript",
-      outDir: "./packages/sdk-ts",
+      language: "python",
+      outDir: "./packages/howest-resto-py",
       options: {
-        packageName: "@maurodruwel/howest-resto-api",
+        packageName: "howest_resto",
+        repository: "https://github.com/MauroDruwel/howest-resto-py",
       },
     },
     {
       type: "sdk",
-      language: "python",
-      outDir: "./packages/sdk-py",
+      language: "typescript",
+      outDir: "./packages/howest-resto-ts",
       options: {
-        packageName: "howest_resto_api",
+        packageName: "@maurodruwel/howest-resto",
+        repository: "https://github.com/MauroDruwel/howest-resto-ts",
       },
     },
   ],

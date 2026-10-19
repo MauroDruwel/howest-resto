@@ -1,14 +1,13 @@
 {
-  "name": "@maurodruwel/howest-resto-forge",
+  "name": "@maurodruwel/howest-resto",
   "version": "1.0.0",
-  "description": "Cloudflare Forge & OpenAPI service providing structured menus for Howest student restaurants",
+  "description": "OpenAPI specification and Cloudflare Forge configuration for Howest student restaurant menus",
   "private": true,
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "test": "vitest run",
-    "generate": "echo 'No extra code generation needed; OpenAPI spec is at docs/openapi.yaml'"
+    "test": "vitest run"
   },
   "keywords": [
     "forge",

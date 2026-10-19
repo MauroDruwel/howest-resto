@@ -1,96 +1,83 @@
-# Howest Resto API & Cloudflare Forge Service
+# Howest Resto API & Specifications 🍽️
 
-[![CI](https://github.com/MauroDruwel/howest-resto-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/MauroDruwel/howest-resto-forge/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/MauroDruwel/howest-resto/actions/workflows/ci.yml/badge.svg)](https://github.com/MauroDruwel/howest-resto/actions/workflows/ci.yml)
+[![OpenAPI 3.0.3](https://img.shields.io/badge/OpenAPI-3.0.3-green.svg)](docs/openapi.yaml)
 [![Quality Gate](https://img.shields.io/badge/Mauro%20Quality%20Gate-Passed-brightgreen)](https://github.com/MauroDruwel/quality-gate)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Structured JSON API, OpenAPI 3.0.3 specification, and Cloudflare Forge configuration for Howest University of Applied Sciences student restaurant menus.
+The canonical OpenAPI 3.0.3 specification and [Cloudflare Forge](https://github.com/MauroDruwel/quality-gate) configuration for **Howest University of Applied Sciences** student restaurant menus, scraped directly and reliably from `resto.howest.be`.
+
+This repository serves as the single source of truth for the API contract, powering automated multi-language client SDKs and the upcoming **Home Assistant** integration.
 
 ---
 
-## 🍽️ Features
+## 📚 Interactive Documentation
 
-- **OpenAPI 3.0.3 Specification**: Clean contract (`docs/openapi.yaml`) defining campuses, weekly menus, and daily dish representations.
-- **Cloudflare Forge Integration**: Configured in `forge.config.ts` for automated TypeScript and Python client SDK generation.
-- **ASP.NET Scraper**: Handles ASP.NET WebForms `__VIEWSTATE` lifecycle and dynamic campus switching against `resto.howest.be`.
-- **Bilingual Menu Parsing**: Automatically separates Dutch dish descriptions from English translations (delimited by `***`).
-- **Edge Deployment**: Standard Request/Response fetch handler suitable for Cloudflare Workers.
+- **Swagger UI**: View and test the OpenAPI specification in [`docs/index.html`](docs/index.html).
+- **OpenAPI Schema**: Raw specification file located at [`docs/openapi.yaml`](docs/openapi.yaml).
+
+---
+
+## 📦 Official Multi-Language Client SDKs
+
+Client libraries are generated and maintained in separate language repositories:
+
+| Language | Repository | Package | Description |
+| :--- | :--- | :--- | :--- |
+| **Python** | [**`howest-resto-py`**](https://github.com/MauroDruwel/howest-resto-py) | `howest-resto` | Typed sync & async client with zero dependencies. Ready for Home Assistant. |
+| **TypeScript** | [**`howest-resto-ts`**](https://github.com/MauroDruwel/howest-resto-ts) | `@maurodruwel/howest-resto` | Modern TypeScript/ESM client for Node.js and browser environments. |
 
 ---
 
 ## 🏫 Supported Campuses
 
 | Code | Campus / Restaurant | City | Address |
-|---|---|---|---|
-| `GKG` | **'t Obeetje** (Default) | Kortrijk | Graaf Karel de Goedelaan 5 |
-| `PENTA` | **Plaza** | Kortrijk | Sint-Martens-Latemlaan 1B |
-| `RSS` | **YUM** | Brugge | Rijselstraat 5 |
-| `RSS1` | **DAD** | Brugge | Spoorwegstraat 4 |
-| `SIC` | **BSI** | Brugge | Nijverheidsstraat 112 |
-| `TS` | **The Square** | Kortrijk | Luipaardstraat 12A |
+| :---: | :--- | :--- | :--- |
+| **`GKG`** | **'t Obeetje** *(Default)* | Kortrijk | Graaf Karel de Goedelaan 5 |
+| **`PENTA`** | **Plaza** | Kortrijk | Sint-Martens-Latemlaan 1B |
+| **`RSS`** | **YUM** | Brugge | Rijselstraat 5 |
+| **`RSS1`** | **DAD** | Brugge | Spoorwegstraat 4 |
+| **`SIC`** | **BSI** | Brugge | Nijverheidsstraat 112 |
+| **`TS`** | **The Square** | Kortrijk | Luipaardstraat 12A |
 
 ---
 
-## 📦 Multi-Language Client SDKs
+## 🚀 API Endpoints
 
-The repository provides native client libraries that read directly from Howest's system (no API server hosting required):
+| Method | Endpoint | Query Parameters | Description |
+| :---: | :--- | :--- | :--- |
+| `GET` | `/api/campuses` | *None* | List all 6 known Howest campuses with code, name, city, and address. |
+| `GET` | `/api/menu` | `campus=GKG`, `week=current` | Retrieve the full weekly menu (`week`: `current`, `next`, `previous`). |
+| `GET` | `/api/menu/today` | `campus=GKG`, `week=current` | Retrieve today's specific lunch dishes (Dutch & English). |
+| `GET` | `/` | *None* | Healthcheck and summary of available endpoints. |
 
-### Python (`packages/sdk-py`)
-Zero external dependencies (uses standard library `urllib` & `html.parser`):
-```python
-from howest_resto import HowestRestoClient
+---
 
-client = HowestRestoClient()
+## 🔄 Cloudflare Forge Integration
 
-# Get next week's menu for Kortrijk
-menu = client.get_menu(campus="GKG", week="next")
-for day in menu.days:
-    print(day.day, day.date, day.dutch_dishes)
+SDK generation targets and invariants are defined in [`forge.config.ts`](forge.config.ts):
 
-# Get today's menu for Brugge
-today = client.get_today_menu(campus="RSS")
-if today:
-    print("Today in Brugge:", today.dutch_dishes)
-```
-
-### TypeScript / Node (`packages/sdk-ts`)
 ```typescript
-import { HowestRestoClient } from '@maurodruwel/howest-resto';
-
-const client = new HowestRestoClient();
-
-// Get next week's menu
-const menu = await client.getMenu({ campus: 'GKG', week: 'next' });
-console.log(menu.campusName, menu.days);
+export default {
+  spec: "./docs/openapi.yaml",
+  targets: [
+    {
+      type: "sdk",
+      language: "python",
+      outDir: "./packages/howest-resto-py",
+      options: { packageName: "howest_resto" },
+    },
+    {
+      type: "sdk",
+      language: "typescript",
+      outDir: "./packages/howest-resto-ts",
+      options: { packageName: "@maurodruwel/howest-resto" },
+    },
+  ],
+};
 ```
 
----
-
-## 🚀 Cloudflare Worker & API Endpoints
-
-For REST / OpenAPI integration:
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/campuses` | Returns list of all known Howest campuses with locations |
-| `GET` | `/api/menu?campus=GKG&week=next` | Returns weekly menu (`week`: `current`, `next`, `previous`) |
-| `GET` | `/api/menu/today?campus=GKG` | Returns today's specific dishes (Dutch + English) |
-| `GET` | `/` | API status and available endpoints summary |
-
----
-
-## 🛠️ Development & Testing
-
-```bash
-# Install dependencies
-pnpm install
-
-# Run unit tests
-pnpm test
-
-# Build TypeScript
-pnpm run build
-```
+Continuous integration runs via [`MauroDruwel/quality-gate/.github/workflows/forge-ci.yml`](https://github.com/MauroDruwel/quality-gate), enforcing structural OpenAPI 3.x schema validation on every push and pull request.
 
 ---
 
